@@ -1,0 +1,369 @@
+@import "tailwindcss";
+
+@theme {
+  /* === SAUL'S COLOR PALETTE (no muted tones allowed) === */
+  --color-saul-yellow: #FFD700;
+  --color-saul-yellow-deep: #F4C400;
+  --color-saul-red: #C8102E;
+  --color-saul-red-deep: #9A0C24;
+  --color-saul-cream: #F5E6D3;
+  --color-saul-cream-deep: #E8D4B8;
+  --color-saul-ink: #0E0E0E;
+  --color-saul-newspaper: #ECE2CC;
+  --color-saul-stamp: #B71F2A;
+
+  /* === FONTS (wired up in layout.tsx via next/font) === */
+  --font-display: var(--font-anton);
+  --font-headline: var(--font-bebas);
+  --font-body: var(--font-oswald);
+  --font-serif-fine: var(--font-special-elite);
+
+  /* === SHADOWS that feel printed === */
+  --shadow-stamp: 0 0 0 4px var(--color-saul-stamp), 4px 4px 0 4px rgba(0,0,0,0.35);
+  --shadow-card-thud: 12px 12px 0 0 rgba(0,0,0,0.85);
+  --shadow-yellow-glow: 0 0 0 4px #FFD700, 0 0 24px 4px rgba(255,215,0,0.65);
+}
+
+/* === GLOBAL RESET / BASE === */
+html, body {
+  background: var(--color-saul-cream);
+  color: var(--color-saul-ink);
+  font-family: var(--font-body), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+body {
+  background-image:
+    radial-gradient(rgba(0,0,0,0.08) 1px, transparent 1px),
+    radial-gradient(rgba(0,0,0,0.04) 1px, transparent 1px);
+  background-size: 6px 6px, 3px 3px;
+  background-position: 0 0, 1px 1px;
+}
+
+::selection {
+  background: var(--color-saul-yellow);
+  color: var(--color-saul-ink);
+}
+
+/* === REUSABLE EFFECT CLASSES === */
+.halftone-overlay {
+  position: relative;
+}
+.halftone-overlay::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(0,0,0,0.18) 1px, transparent 1px);
+  background-size: 4px 4px;
+  mix-blend-mode: multiply;
+  opacity: 0.45;
+}
+
+.paper-grain {
+  background-image:
+    repeating-linear-gradient(90deg, rgba(0,0,0,0.03) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(0deg, rgba(0,0,0,0.025) 0 1px, transparent 1px 4px);
+}
+
+.text-stroke-ink {
+  -webkit-text-stroke: 2px #0E0E0E;
+  color: transparent;
+}
+
+.text-shadow-pop {
+  text-shadow: 4px 4px 0 #0E0E0E;
+}
+.text-shadow-pop-red {
+  text-shadow: 4px 4px 0 #C8102E;
+}
+
+/* Star bursts behind big titles */
+.starburst {
+  position: absolute;
+  width: 14rem;
+  height: 14rem;
+  background:
+    conic-gradient(from 0deg,
+      #C8102E 0 12deg, #FFD700 12deg 24deg,
+      #C8102E 24deg 36deg, #FFD700 36deg 48deg,
+      #C8102E 48deg 60deg, #FFD700 60deg 72deg,
+      #C8102E 72deg 84deg, #FFD700 84deg 96deg,
+      #C8102E 96deg 108deg, #FFD700 108deg 120deg,
+      #C8102E 120deg 132deg, #FFD700 132deg 144deg,
+      #C8102E 144deg 156deg, #FFD700 156deg 168deg,
+      #C8102E 168deg 180deg, #FFD700 180deg 192deg,
+      #C8102E 192deg 204deg, #FFD700 204deg 216deg,
+      #C8102E 216deg 228deg, #FFD700 228deg 240deg,
+      #C8102E 240deg 252deg, #FFD700 252deg 264deg,
+      #C8102E 264deg 276deg, #FFD700 276deg 288deg,
+      #C8102E 288deg 300deg, #FFD700 300deg 312deg,
+      #C8102E 312deg 324deg, #FFD700 324deg 336deg,
+      #C8102E 336deg 348deg, #FFD700 348deg 360deg);
+  clip-path: polygon(
+    50% 0%, 58% 35%, 100% 50%, 58% 65%, 50% 100%,
+    42% 65%, 0% 50%, 42% 35%
+  );
+  filter: drop-shadow(4px 4px 0 #0E0E0E);
+}
+
+/* Ticker scroll */
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.ticker-track {
+  display: inline-flex;
+  animation: ticker 35s linear infinite;
+  white-space: nowrap;
+}
+
+/* Stamp wobble */
+@keyframes stamp-wobble {
+  0%   { transform: rotate(-8deg) scale(1); }
+  50%  { transform: rotate(-10deg) scale(1.02); }
+  100% { transform: rotate(-8deg) scale(1); }
+}
+.stamp-wobble { animation: stamp-wobble 2.4s ease-in-out infinite; }
+
+/* Subtle inflatable-sway */
+@keyframes sway {
+  0%, 100% { transform: rotate(-2deg); }
+  50%      { transform: rotate(2deg); }
+}
+.sway { animation: sway 4s ease-in-out infinite; transform-origin: 50% 100%; }
+
+/* Infomercial button vibe */
+.btn-infomercial {
+  position: relative;
+  display: inline-block;
+  background: var(--color-saul-red);
+  color: white;
+  font-family: var(--font-headline);
+  letter-spacing: 0.05em;
+  padding: 1rem 2rem;
+  border: 4px solid #0E0E0E;
+  box-shadow: 6px 6px 0 #0E0E0E;
+  transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+  text-transform: uppercase;
+}
+.btn-infomercial:hover {
+  transform: translate(-2px, -2px) scale(1.03);
+  box-shadow: 9px 9px 0 #0E0E0E, 0 0 24px rgba(255,215,0,0.6);
+  background: #E81836;
+}
+.btn-infomercial:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #0E0E0E;
+}
+
+/* Disclaimers — proudly microscopic */
+.fine-print { font-size: 8px; line-height: 1.3; color: #555; }
+.finer-print { font-size: 6px; line-height: 1.25; color: #666; }
+
+/* "FREE!" stamp that pops on hover */
+.free-stamp {
+  position: absolute;
+  top: -10px; right: -10px;
+  background: var(--color-saul-yellow);
+  color: var(--color-saul-red-deep);
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  border: 3px solid #0E0E0E;
+  padding: 0.25rem 0.6rem;
+  transform: rotate(12deg) scale(0);
+  transition: transform 200ms cubic-bezier(.34,1.56,.64,1);
+  pointer-events: none;
+  z-index: 5;
+}
+.group:hover .free-stamp { transform: rotate(12deg) scale(1); }
+
+/* Cinematic dim before content visible (intro guard) */
+.intro-hidden { visibility: hidden; }
+
+/* American flag stripe accent */
+.flag-stripes {
+  background:
+    repeating-linear-gradient(0deg, #C8102E 0 6px, #F5E6D3 6px 12px);
+}
+
+/* =========================================================
+   ADDED: subtle commercial-style polish — pulses, glows,
+   slam-ins, floats. All durations 200–600ms for interactions,
+   long & quiet (3–6s) for ambient. Reduced-motion guarded
+   at the bottom of this file.
+   ========================================================= */
+
+/* Slow CTA pulse — "call now" energy without flashing */
+@keyframes cta-pulse {
+  0%, 100% { box-shadow: 6px 6px 0 #0E0E0E; }
+  50%      { box-shadow: 6px 6px 0 #0E0E0E, 0 0 0 6px rgba(255,215,0,0.35); }
+}
+.btn-infomercial {
+  animation: cta-pulse 2.8s ease-in-out infinite;
+}
+@keyframes cta-shake {
+  0%, 100% { transform: translate(-2px, -2px) scale(1.03); }
+  25%      { transform: translate(-3px, -2px) scale(1.03) rotate(-0.5deg); }
+  75%      { transform: translate(-1px, -2px) scale(1.03) rotate(0.5deg); }
+}
+.btn-infomercial:hover { animation: cta-shake 350ms ease-in-out; }
+
+/* Hero phone number — occasional red pulse */
+@keyframes phone-pulse {
+  0%, 92%, 100% { color: inherit; transform: scale(1); }
+  94%           { color: #C8102E; transform: scale(1.05); }
+  96%           { color: inherit; transform: scale(1); }
+  98%           { color: #C8102E; transform: scale(1.05); }
+}
+.phone-pulse { animation: phone-pulse 5s ease-in-out infinite; display: inline-block; }
+
+/* Logo float — diamond in the header gently rises and settles */
+@keyframes logo-float {
+  0%, 100% { transform: translateY(0) rotate(45deg); }
+  50%      { transform: translateY(-6px) rotate(45deg); }
+}
+.logo-float { animation: logo-float 3s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+
+/* Section-heading accent glow — for the yellow accent word in titles */
+@keyframes accent-glow {
+  0%, 100% { text-shadow: 0 0 0 rgba(255,215,0,0); }
+  50%      { text-shadow: 0 0 18px rgba(255,215,0,0.45), 0 0 2px rgba(255,215,0,0.6); }
+}
+.accent-glow { animation: accent-glow 3.2s ease-in-out infinite; }
+
+/* Underline draw-in for headings — appears once when revealed */
+@keyframes underline-draw {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+.heading-underline {
+  position: relative;
+  display: inline-block;
+}
+.heading-underline::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -6px;
+  height: 4px;
+  background: #C8102E;
+  transform-origin: left center;
+  animation: underline-draw 700ms cubic-bezier(0.4, 0, 0.2, 1) 200ms forwards;
+  transform: scaleX(0);
+}
+
+/* Compact case-card hover polish */
+.compact-case {
+  transition:
+    transform 240ms cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 240ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.compact-case:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    10px 10px 0 #FFD700,
+    0 0 22px rgba(255,215,0,0.35);
+}
+.compact-case .compact-stamp {
+  transition:
+    transform 220ms cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+}
+.compact-case:hover .compact-stamp {
+  transform: rotate(-6deg) scale(1.08);
+}
+
+/* Compact stamp slam-in — used by GSAP when the card enters viewport */
+@keyframes stamp-slam {
+  0%   { opacity: 0; transform: scale(2) rotate(-15deg); }
+  60%  { opacity: 1; transform: scale(0.92) rotate(-2deg); }
+  80%  { transform: scale(1.04) rotate(-4deg); }
+  100% { opacity: 1; transform: scale(1) rotate(-3deg); }
+}
+.stamp-slam-in {
+  animation: stamp-slam 450ms cubic-bezier(0.4, 0, 0.2, 1) backwards;
+}
+
+/* =========================================================
+   "Jimmy, you are always down." outro — muted utilities
+   ========================================================= */
+.outro-quiet {
+  font-family: var(--font-serif-fine), Georgia, serif;
+  color: rgba(245, 230, 211, 0.72);
+}
+@keyframes outro-drift {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(2px); }
+}
+@keyframes outro-flicker {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.75; }
+}
+.outro-drift   { animation: outro-drift 8s ease-in-out infinite; }
+.outro-flicker { animation: outro-flicker 7s ease-in-out infinite; }
+
+/* ADDED: typewriter cursor — blinks 1Hz, used during and after Kim's line */
+@keyframes outro-cursor-blink {
+  0%, 49%   { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+.outro-cursor {
+  display: inline-block;
+  margin-left: 1px;
+  color: rgba(245, 230, 211, 0.75);
+  animation: outro-cursor-blink 1s steps(1) infinite;
+  font-weight: 300;
+}
+
+/* ADDED: subtle "always" pulse — fires once when the word finishes typing */
+@keyframes outro-always-pulse {
+  0%   { transform: scale(1);    text-shadow: 0 0 0 rgba(245,230,211,0); }
+  40%  { transform: scale(1.05); text-shadow: 0 0 16px rgba(245,230,211,0.35); }
+  100% { transform: scale(1);    text-shadow: 0 0 0 rgba(245,230,211,0); }
+}
+.outro-always {
+  display: inline-block;
+  transform-origin: center;
+}
+.outro-always--pulse {
+  animation: outro-always-pulse 600ms ease-out;
+}
+
+/* ADDED: "hover to hear" badge — gentle slow pulse so it draws the eye
+   without being loud. Muted, somber, no bright color. */
+@keyframes outro-badge-pulse {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
+.outro-badge-pulse {
+  animation: outro-badge-pulse 3s ease-in-out infinite;
+}
+
+/* ADDED: slow "breath" on the dialogue block while hovered — opacity
+   dip 1 → 0.92 → 1. Reads as a tired exhale, not a flicker. */
+@keyframes outro-breath {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.92; }
+}
+.outro-breath {
+  animation: outro-breath 4s ease-in-out infinite;
+}
+
+/* =========================================================
+   prefers-reduced-motion — disables decorative/ambient
+   animations. Keeps transitions instant so the site is still
+   responsive, just not moving on its own.
+   ========================================================= */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .btn-infomercial, .logo-float, .phone-pulse, .accent-glow,
+  .outro-drift, .outro-flicker, .stamp-wobble, .sway {
+    animation: none !important;
+  }
+}
