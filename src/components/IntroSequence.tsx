@@ -2,6 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 const TITLE_TOP = "BETTER";
 const TITLE_MID = "CALL";
@@ -89,19 +94,50 @@ export function IntroSequence() {
   const finalize = () => {
     if (typeof window !== "undefined") sessionStorage.setItem(SKIPPED_KEY, "1");
     document.body.style.overflow = "";
+    // The intro was a fixed full-screen overlay that locked scroll and shifted
+    // layout. Every ScrollTrigger created behind it cached stale start/end
+    // positions, so play-once "gsap.from" sections (portrait, credentials,
+    // services, cases…) stayed at opacity:0 until a SECOND scroll forced a
+    // recalc. Now that the page is scrollable and laid out, refresh them all
+    // so above-the-fold triggers fire immediately.
+    requestAnimationFrame(() => ScrollTrigger.refresh());
   };
 
   const skip = () => {
     tlRef.current?.progress(1);
+    // progress(1) seeks the timeline and does NOT fire its onComplete, so run
+    // the same cleanup (scroll unlock + ScrollTrigger refresh) explicitly.
+    finalize();
   };
 
   // Lock scroll only while intro plays.
   useEffect(() => {
     document.body.style.overflow = "hidden";
-    const t = setTimeout(() => {
+    const unlock = () => {
       document.body.style.overflow = "";
-    }, 3200);
-    return () => clearTimeout(t);
+      ScrollTrigger.refresh();
+    };
+    const t = setTimeout(unlock, 3200);
+    return () => {
+      clearTimeout(t);
+      unlock();
+    };
+  }, []);
+
+  // Fonts load async (next/font); a swap after the refresh above would shift
+  // text layout and re-stale the trigger positions. Refresh again once the
+  // real fonts are in.
+  useEffect(() => {
+    if (typeof document === "undefined" || !document.fonts) return;
+    let active = true;
+    document.fonts.ready
+      .then(() => {
+        if (active) ScrollTrigger.refresh();
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
   }, []);
 
   return (

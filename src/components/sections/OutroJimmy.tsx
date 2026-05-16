@@ -116,11 +116,15 @@ export function OutroJimmy() {
     );
 
     const jimmyDoneAt = 300 + JIMMY_LINE.length * 50;
-    const kimLabelAt = jimmyDoneAt + 1200; // ~1.2s silence (the point)
-    push(setTimeout(() => setKimLabelVisible(true), kimLabelAt));
 
-    // Step 5: Kim line types after the KIM label fades (400ms).
-    const kimStartAt = kimLabelAt + 400;
+    // 3.5s of silence between the two lines — this single beat is what the
+    // audio clip waits between "Kick a man when he's down." and Kim's reply,
+    // so the second line types exactly when she speaks. No other pause is
+    // inserted between the two lines.
+    const KIM_GAP_MS = 3500;
+    const kimStartAt = jimmyDoneAt + KIM_GAP_MS;
+    const kimLabelAt = kimStartAt - 300; // KIM label fades in just before the text
+    push(setTimeout(() => setKimLabelVisible(true), kimLabelAt));
     push(
       setTimeout(() => {
         let i = 0;

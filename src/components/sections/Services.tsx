@@ -85,9 +85,11 @@ export function Services() {
   useEffect(() => {
     const ctx = gsap.context(() => {
       gsap.from(".service-card", {
-        // CHANGED: replay each time the section enters the viewport
-        // CHANGED: trigger earlier + play-once-stay-visible (no reset → can't get stuck hidden)
-        scrollTrigger: { trigger: ref.current, start: "top 90%", toggleActions: "play none none none" },
+        // Trigger off the CARD GRID, not the section. The section has a tall
+        // header, so triggering on the section top played the whole staggered
+        // entrance while the cards were still far below the fold — by the time
+        // you scrolled to them it was already over (looked like no animation).
+        scrollTrigger: { trigger: ".services-grid", start: "top 85%", toggleActions: "play none none none" },
         opacity: 0,
         y: 60,
         rotate: () => gsap.utils.random(-3, 3),
@@ -120,7 +122,7 @@ export function Services() {
           </p>
         </header>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="services-grid grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {SERVICES.map((s, idx) => (
             <article
               key={s.title}
