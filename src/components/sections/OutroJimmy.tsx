@@ -199,6 +199,53 @@ export function OutroJimmy() {
     if (audioRef.current) audioRef.current.volume = 0.75;
   }, []);
 
+  // Browsers block media playback until the page has had a real user gesture
+  // (click / tap / key) — hovering does NOT count. This section is
+  // hover-driven, so the first hover's play() was being silently rejected and
+  // only started working after the mute-button CLICK granted the page user
+  // activation. Fix: on the very first real gesture anywhere, silently
+  // "prime" the <audio> element (muted play → immediate pause) so every later
+  // hover-triggered play() is allowed on the first try.
+  useEffect(() => {
+    let done = false;
+    const prime = () => {
+      if (done) return;
+      done = true;
+      window.removeEventListener("pointerdown", prime);
+      window.removeEventListener("keydown", prime);
+      window.removeEventListener("touchstart", prime);
+      const a = audioRef.current;
+      if (!a) return;
+      const prevMuted = a.muted;
+      a.muted = true;
+      const restore = () => {
+        a.pause();
+        a.currentTime = 0;
+        a.muted = prevMuted;
+      };
+      try {
+        const p = a.play();
+        if (p && typeof p.then === "function") {
+          p.then(restore).catch(() => {
+            a.muted = prevMuted;
+          });
+        } else {
+          restore();
+        }
+      } catch {
+        a.muted = prevMuted;
+      }
+    };
+    window.addEventListener("pointerdown", prime);
+    window.addEventListener("keydown", prime);
+    window.addEventListener("touchstart", prime);
+    return () => {
+      window.removeEventListener("pointerdown", prime);
+      window.removeEventListener("keydown", prime);
+      window.removeEventListener("touchstart", prime);
+    };
+  }, []);
+
   const playClip = useCallback(() => {
     const a = audioRef.current;
     if (!a || !audioEnabled) return;
